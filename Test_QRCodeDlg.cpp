@@ -115,26 +115,32 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 	const QrCode qr = QrCode::encodeText(text, errCorLvl);
 
 	//dot size = 4px, margin = 4px for 4 multipled
-	int w = qr.getSize() * 4 + 4 * 2;
-	int h = qr.getSize() * 4 + 4 * 2;
+	CSize sz_cell(4, 4); // size of each module in pixels
+	CSize sz_margin(8, 8); // margin around the QR code in pixels
+	int w = qr.getSize() * sz_cell.cx + sz_margin.cx * 2;
+	int h = qr.getSize() * sz_cell.cy + sz_margin.cy * 2;
+
 	CGdiplusBitmap img(w, h, PixelFormat24bppRGB);
 	Gdiplus::Graphics g(img);
-	Gdiplus::SolidBrush br(Gdiplus::Color::Red);
+	Gdiplus::SolidBrush br(Gdiplus::Color::Black);
+
+	g.Clear(Gdiplus::Color::White); // 배경을 흰색으로 설정
+
 	//img.get_raw_data();
 
-	for (int y = 0; y < img.height; y += 4)
+	for (int y = 0; y < img.height; y += sz_cell.cy)
 	{
-		for (int x = 0; x < img.width; x += 4)
+		for (int x = 0; x < img.width; x += sz_cell.cx)
 		{
-			TRACE(_T("%d, %d = %d\n"), x, y, qr.getModule((x - 4) / 4, (y - 4) / 4));
-			if (qr.getModule((x - 4) / 4, (y - 4) / 4))
-				g.FillRectangle(&br, x, y, 4, 4);
+			TRACE(_T("%d, %d = %d\n"), x, y, qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy));
+			if (qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy))
+				g.FillRectangle(&br, x, y, sz_cell.cx, sz_cell.cy);
 			//img.set_pixel(x, y, qr.getModule((x - 4) / 4, (y - 4) / 4) ? Gdiplus::Color::Black : Gdiplus::Color::White);
 		}
 	}
 
 	//img.set_raw_data();
-	img.save(_T("D:\\Test_QRCode.bmp"));
+	img.save(_T("D:\\Test_QRCode.png"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
