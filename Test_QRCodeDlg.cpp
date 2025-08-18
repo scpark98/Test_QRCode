@@ -8,7 +8,7 @@
 #include "Test_QRCodeDlg.h"
 #include "afxdialogex.h"
 
-#include "qrcodegen.hpp"
+#include "image_processing/qrcodegen/qrcodegen.hpp"
 
 #include "Functions.h"
 #include "MemoryDC.h"
@@ -126,8 +126,6 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 
 	g.Clear(Gdiplus::Color::White); // 배경을 흰색으로 설정
 
-	//img.get_raw_data();
-
 	for (int y = 0; y < m_img.height; y += sz_cell.cy)
 	{
 		for (int x = 0; x < m_img.width; x += sz_cell.cx)
@@ -135,11 +133,9 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 			TRACE(_T("%d, %d = %d\n"), x, y, qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy));
 			if (qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy))
 				g.FillRectangle(&br, x, y, sz_cell.cx, sz_cell.cy);
-			//img.set_pixel(x, y, qr.getModule((x - 4) / 4, (y - 4) / 4) ? Gdiplus::Color::Black : Gdiplus::Color::White);
 		}
 	}
 
-	//img.set_raw_data();
 	m_img.save(_T("D:\\Test_QRCode.bmp"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
