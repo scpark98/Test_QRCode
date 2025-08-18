@@ -10,8 +10,8 @@
 
 #include "qrcodegen.hpp"
 
-#include "D:\\1.Projects_C++\\Common\\Functions.h"
-#include "D:\\1.Projects_C++\\Common\\GdiplusBitmap.h"
+#include "Functions.h"
+#include "MemoryDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -120,17 +120,17 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 	int w = qr.getSize() * sz_cell.cx + sz_margin.cx * 2;
 	int h = qr.getSize() * sz_cell.cy + sz_margin.cy * 2;
 
-	CGdiplusBitmap img(w, h, PixelFormat24bppRGB);
-	Gdiplus::Graphics g(img);
+	m_img.create(w, h, PixelFormat24bppRGB);
+	Gdiplus::Graphics g(m_img);
 	Gdiplus::SolidBrush br(Gdiplus::Color::Black);
 
 	g.Clear(Gdiplus::Color::White); // 배경을 흰색으로 설정
 
 	//img.get_raw_data();
 
-	for (int y = 0; y < img.height; y += sz_cell.cy)
+	for (int y = 0; y < m_img.height; y += sz_cell.cy)
 	{
-		for (int x = 0; x < img.width; x += sz_cell.cx)
+		for (int x = 0; x < m_img.width; x += sz_cell.cx)
 		{
 			TRACE(_T("%d, %d = %d\n"), x, y, qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy));
 			if (qr.getModule((x - sz_margin.cx) / sz_cell.cx, (y - sz_margin.cy) / sz_cell.cy))
@@ -140,7 +140,7 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 	}
 
 	//img.set_raw_data();
-	img.save(_T("D:\\Test_QRCode.png"));
+	m_img.save(_T("D:\\Test_QRCode.bmp"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -183,7 +183,21 @@ void CTestQRCodeDlg::OnPaint()
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		CPaintDC dc1(this);
+		CRect rc;
+
+		GetClientRect(rc);
+		CMemoryDC dc(&dc1, &rc);
+		Gdiplus::Graphics g(dc.m_hDC);
+
+		//g.SetInterpolationMode(Gdiplus::InterpolationModeDefault);
+
+		if (m_img.is_valid())
+		{
+			m_img.draw(dc, rc, CSCGdiplusBitmap::draw_mode_zoom);
+			//CRect r = get_ratio_rect(rc, (double)m_img.width / (double)m_img.height);
+			//g.DrawImage(m_img.m_pBitmap, CRect2GpRect(r));
+		}
 	}
 }
 
