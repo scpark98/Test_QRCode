@@ -8,10 +8,10 @@
 #include "Test_QRCodeDlg.h"
 #include "afxdialogex.h"
 
-#include "image_processing/qrcodegen/qrcodegen.hpp"
+#include "Common/image_processing/qrcodegen/qrcodegen.hpp"
 
-#include "Functions.h"
-#include "MemoryDC.h"
+#include "Common/Functions.h"
+#include "Common/MemoryDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -136,7 +136,7 @@ BOOL CTestQRCodeDlg::OnInitDialog()
 		}
 	}
 
-	m_img.save(_T("D:\\Test_QRCode.bmp"));
+	m_img.save(_T("D:\\Test_QRCode.png"), 0);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -186,13 +186,17 @@ void CTestQRCodeDlg::OnPaint()
 		CMemoryDC dc(&dc1, &rc);
 		Gdiplus::Graphics g(dc.m_hDC);
 
-		//g.SetInterpolationMode(Gdiplus::InterpolationModeDefault);
+		g.SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
 
 		if (m_img.is_valid())
 		{
-			m_img.draw(dc, rc, CSCGdiplusBitmap::draw_mode_zoom);
-			//CRect r = get_ratio_rect(rc, (double)m_img.width / (double)m_img.height);
-			//g.DrawImage(m_img.m_pBitmap, CRect2GpRect(r));
+			//m_img.draw()를 사용하면 dc를 Gdiplus::Graphics로 생성 시 기본 InterpolationModeDefault를 사용하는 듯하다.
+			//그래서 픽셀이 AntiAliasing되어서 QR 코드가 흐릿하게 보인다.
+			//m_img.draw(dc, rc, CSCGdiplusBitmap::draw_mode_zoom);
+
+			//또렷한 이미지 출력이 필요하다면 아래와 같이 직접 그려준다.
+			CRect r = get_ratio_rect(rc, (double)m_img.width / (double)m_img.height);
+			g.DrawImage(m_img.m_pBitmap, CRect2GpRect(r));
 		}
 	}
 }

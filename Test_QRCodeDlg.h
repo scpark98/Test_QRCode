@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "SCGdiplusBitmap.h"
+#include "Common/SCGdiplusBitmap.h"
 
 
 // CTestQRCodeDlg 대화 상자
